@@ -1,5 +1,5 @@
 from rest_framework import status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateDestroyAPIView
@@ -49,6 +49,7 @@ class LoginView(APIView):
 
 
 class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         response = Response(status=status.HTTP_204_NO_CONTENT)
@@ -59,6 +60,7 @@ class LogoutView(APIView):
 
 class UserRegisterGenericView(CreateAPIView):
     serializer_class = UserCreateUpdateSerializer
+    permission_classes = [AllowAny]
 
     def create(self, request: Request, *args, **kwargs) -> Response:
         serializer = self.get_serializer(data=request.data)
@@ -71,14 +73,17 @@ class UserRegisterGenericView(CreateAPIView):
 class UserListGenericView(ListAPIView):
     serializer_class = UserListSerializer
     queryset = User.objects.all()
+    permission_classes = [IsAdminUser]
 
 class UserRetrieveUpdateDestroyGenericView(RetrieveUpdateDestroyAPIView):
     serializer_class = UserRetrieveUpdateDestroySerializer
     queryset = User.objects.all()
+    permission_classes = [IsAdminUser]
 
 class UserDetailGenericView(RetrieveUpdateDestroyAPIView):
     serializer_class = UserCreateUpdateSerializer
     queryset = User.objects.all()
+    permission_classes = [IsAuthenticated]
 
     def get_object(self):
         return self.request.user
