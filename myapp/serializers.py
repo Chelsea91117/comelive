@@ -10,7 +10,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['name', 'email', 'password', 're_password']
+        fields = ['name', 'email', 'is_landlord', 'is_renter', 'password','re_password']
         extra_kwargs = {'password': {'write_only': True}}
 
     def validate(self, data):
@@ -44,4 +44,18 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 class UserListSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = '__all__'
+        exclude = ['password', 'groups', 'user_permissions']
+
+
+class UserAdminRetrieveUpdateDestroySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        exclude = ['password']
+        read_only_fields = ['id', 'name', 'email', 'date_joined', 'last_login', 'groups', 'user_permissions']
+
+
+class UserRetrieveUpdateDestroySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['name', 'email', 'password', 'is_landlord', 'is_renter']
+

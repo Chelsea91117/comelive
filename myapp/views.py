@@ -1,10 +1,10 @@
 from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.generics import CreateAPIView, ListAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateDestroyAPIView
 
 from myapp.models import User
-from myapp.serializers import UserRegisterSerializer, UserListSerializer
+from myapp.serializers import UserRegisterSerializer, UserListSerializer, UserAdminRetrieveUpdateDestroySerializer
 
 
 class UserRegisterGenericView(CreateAPIView):
@@ -21,3 +21,8 @@ class UserRegisterGenericView(CreateAPIView):
 class UserListGenericView(ListAPIView):
     serializer_class = UserListSerializer
     queryset = User.objects.all()
+
+class UserAdminRetrieveUpdateDestroyGenericView(RetrieveUpdateDestroyAPIView):
+    serializer_class = UserAdminRetrieveUpdateDestroySerializer
+    queryset = User.objects.all()
+
