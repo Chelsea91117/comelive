@@ -5,7 +5,7 @@ from django.contrib.auth.password_validation import validate_password
 import re
 
 
-class UserRegisterSerializer(serializers.ModelSerializer):
+class UserCreateUpdateSerializer(serializers.ModelSerializer):
     re_password = serializers.CharField(max_length=50, write_only=True)
 
     class Meta:
@@ -40,6 +40,11 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
+    def update(self, instance, validated_data):
+        if 'password' in validated_data:
+            instance.set_password(validated_data['password'])
+        return super().update(instance, validated_data)
+
 
 class UserListSerializer(serializers.ModelSerializer):
     class Meta:
@@ -47,15 +52,10 @@ class UserListSerializer(serializers.ModelSerializer):
         exclude = ['password', 'groups', 'user_permissions']
 
 
-class UserAdminRetrieveUpdateDestroySerializer(serializers.ModelSerializer):
+class UserRetrieveUpdateDestroySerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         exclude = ['password']
         read_only_fields = ['id', 'name', 'email', 'date_joined', 'last_login', 'groups', 'user_permissions']
 
-
-class UserRetrieveUpdateDestroySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['name', 'email', 'password', 'is_landlord', 'is_renter']
 
