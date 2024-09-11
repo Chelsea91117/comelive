@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.request import Request
@@ -9,6 +10,7 @@ from myapp.models import User
 from myapp.serializers import UserCreateUpdateSerializer, UserListSerializer, UserRetrieveUpdateDestroySerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from datetime import datetime
+from .middleware import JWTAuthenticationMiddleware
 
 class LoginView(APIView):
     permission_classes = [AllowAny]
@@ -49,7 +51,6 @@ class LoginView(APIView):
 
 
 class LogoutView(APIView):
-    permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         response = Response(status=status.HTTP_204_NO_CONTENT)
@@ -87,4 +88,21 @@ class UserDetailGenericView(RetrieveUpdateDestroyAPIView):
 
     def get_object(self):
         return self.request.user
+
+    def destroy(self, request, *args, **kwargs):
+        # Получаем текущего пользователя
+        user = self.get_object()
+        self.perform_destroy(user)
+
+        # Очистка куки
+        response = Response(status=status.HTTP_204_NO_CONTENT)
+        response.delete_cookie('access_token')
+        response.delete_cookie('refresh_token')
+
+        return response
+
+    def perform_destroy(self, instance):
+        instance.delete()
+
+
 

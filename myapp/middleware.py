@@ -15,6 +15,7 @@ class JWTAuthenticationMiddleware(MiddlewareMixin):
                 token = AccessToken(access_token)
                 if datetime.utcfromtimestamp(token['exp']) < datetime.utcnow():
                     raise TokenError('Token expired')
+
                 request.META['HTTP_AUTHORIZATION'] = f'Bearer {access_token}'
             except TokenError:
                 # Попробовать обновить access токен, если refresh токен не истек
