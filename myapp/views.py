@@ -12,7 +12,7 @@ from myapp.serializers import UserCreateUpdateSerializer, UserListSerializer, Us
 from rest_framework_simplejwt.tokens import RefreshToken
 from datetime import datetime
 from .middleware import JWTAuthenticationMiddleware
-from .permissions import IsLandlordOrReadOnly
+from .permissions import IsLandlordOrReadOnly, IsOwnerOrReadOnly
 
 
 class LoginView(APIView):
@@ -112,6 +112,23 @@ class AdListCreateGenericAPIView(ListCreateAPIView):
     serializer_class = AdSerializer
     queryset = Ad.objects.all()
     permission_classes = [IsLandlordOrReadOnly]
+
+class UserAdListGenericAPIView(ListAPIView):
+    serializer_class = AdSerializer
+    queryset = Ad.objects.all()
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Ad.objects.filter(owner=self.request.user)
+
+class AdRetrieveUpdateDestroyGenericAPIView(RetrieveUpdateDestroyAPIView):
+    serializer_class = AdSerializer
+    queryset = Ad.objects.all()
+    permission_classes = [IsOwnerOrReadOnly]
+
+
+
+
 
 
 

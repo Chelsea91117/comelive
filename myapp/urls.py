@@ -9,4 +9,6 @@ urlpatterns = [
     path('users/<int:pk>', UserRetrieveUpdateDestroyGenericView.as_view(), name='user-retrieve-update-destroy'),
     path('users/details/', UserDetailGenericView.as_view(), name='user-details'),
     path('ads/', AdListCreateGenericAPIView.as_view(), name='ads-list-create'),
+    path('ads/<int:pk>', AdRetrieveUpdateDestroyGenericAPIView.as_view(), name='ads-retrieve-update-destroy'),
+    path('ads/my/', UserAdListGenericAPIView.as_view(), name='user-ads-list'),
 ]
