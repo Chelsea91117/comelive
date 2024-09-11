@@ -55,4 +55,21 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.email
 
     
+class Ad(models.Model):
+    TYPE_CHOICES = [
+        ('Apartment', 'Apartment'),
+        ('House', 'House'),
+    ]
+    title = models.CharField(max_length=100)
+    description = models.TextField(null=True, blank=True)
+    state = models.CharField(max_length=50)
+    city = models.CharField(max_length=50)
+    address = models.CharField(max_length=150)
+    price = models.IntegerField()
+    rooms = models.IntegerField()
+    type = models.CharField(max_length=20, choices=TYPE_CHOICES)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateField(auto_now_add=True)
+    updated_at = models.DateField(auto_now=True)
 
