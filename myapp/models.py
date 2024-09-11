@@ -44,6 +44,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     class Meta:
         verbose_name = 'user'
         verbose_name_plural = 'users'
+        ordering = ['email']
 
     def get_full_name(self):
         return self.name
@@ -65,11 +66,18 @@ class Ad(models.Model):
     state = models.CharField(max_length=50)
     city = models.CharField(max_length=50)
     address = models.CharField(max_length=150)
-    price = models.IntegerField()
-    rooms = models.IntegerField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    rooms = models.PositiveSmallIntegerField()
     type = models.CharField(max_length=20, choices=TYPE_CHOICES)
-    owner = models.ForeignKey(User, on_delete=models.CASCADE)
     is_active = models.BooleanField(default=True)
     created_at = models.DateField(auto_now_add=True)
     updated_at = models.DateField(auto_now=True)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
 
+    class Meta:
+        verbose_name = 'ad'
+        verbose_name_plural = 'ads'
+        ordering = ['-id']
+
+    def __str__(self):
+        return self.title

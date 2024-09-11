@@ -3,14 +3,17 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateDestroyAPIView, ListCreateAPIView
 from rest_framework.views import APIView
 from django.contrib.auth import authenticate
-from myapp.models import User
-from myapp.serializers import UserCreateUpdateSerializer, UserListSerializer, UserRetrieveUpdateDestroySerializer
+from myapp.models import User, Ad
+from myapp.serializers import UserCreateUpdateSerializer, UserListSerializer, UserRetrieveUpdateDestroySerializer, \
+    AdSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from datetime import datetime
 from .middleware import JWTAuthenticationMiddleware
+from .permissions import IsLandlordOrReadOnly
+
 
 class LoginView(APIView):
     permission_classes = [AllowAny]
@@ -103,6 +106,13 @@ class UserDetailGenericView(RetrieveUpdateDestroyAPIView):
 
     def perform_destroy(self, instance):
         instance.delete()
+
+
+class AdListCreateGenericAPIView(ListCreateAPIView):
+    serializer_class = AdSerializer
+    queryset = Ad.objects.all()
+    permission_classes = [IsLandlordOrReadOnly]
+
 
 
 
