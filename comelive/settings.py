@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'myapp.apps.MyappConfig',
     'rest_framework',
     'rest_framework_simplejwt',
+    'django_filters',
 
 ]
 

@@ -1,5 +1,4 @@
-from django.http import HttpResponse
-from rest_framework import status
+from rest_framework import status, filters
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -11,8 +10,10 @@ from myapp.serializers import UserCreateUpdateSerializer, UserListSerializer, Us
     AdSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from datetime import datetime
-from .middleware import JWTAuthenticationMiddleware
+
+from .filters import AdFilter
 from .permissions import IsLandlordOrReadOnly, IsOwnerOrReadOnly
+from django_filters.rest_framework import DjangoFilterBackend
 
 
 class LoginView(APIView):
@@ -107,11 +108,17 @@ class UserDetailGenericView(RetrieveUpdateDestroyAPIView):
     def perform_destroy(self, instance):
         instance.delete()
 
-
 class AdListCreateGenericAPIView(ListCreateAPIView):
     serializer_class = AdSerializer
     queryset = Ad.objects.all()
     permission_classes = [IsLandlordOrReadOnly]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['title', 'description']
+    filterset_class = AdFilter
+    ordering_fields = ['price', 'created_at']
+
+    def get_queryset(self):
+        return Ad.objects.filter(is_active=True)
 
 class UserAdListGenericAPIView(ListAPIView):
     serializer_class = AdSerializer
