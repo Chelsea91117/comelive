@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.contrib.auth.models import UserManager, PermissionsMixin, AbstractBaseUser
 from django.db import models
 from django.utils import timezone
@@ -81,3 +83,32 @@ class Ad(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class Booking(models.Model):
+    STATUS_CHOICES = [ ('Pending', 'Pending'), ('Confirmed', 'Confirmed'), ('Rejected', 'Rejected'), ]
+    ad = models.ForeignKey('Ad', on_delete=models.CASCADE, related_name='bookings')
+    start_date = models.DateField(verbose_name='Start date', unique=True)
+    end_date = models.DateField(verbose_name='End date', unique=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
+    created_at = models.DateField(auto_now_add=True, verbose_name='Created at')
+    updated_at = models.DateField(auto_now=True, verbose_name="Updated at")
+    renter = models.ForeignKey(User, on_delete=models.CASCADE, related_name='renter_bookings')
+    landlord = models.ForeignKey(User, on_delete=models.CASCADE, related_name='landlord_bookings')
+
+    @property
+    def busy_dates(self):
+        bookings = Booking.objects.filter(ad=self.ad).exclude(id=self.id)
+        busy_dates = []
+        for booking in bookings:
+            for date in range(booking.start_date, booking.end_date + timedelta(days=1)):
+                busy_dates.append(date)
+        return busy_dates
+
+    class Meta:
+        verbose_name = 'booking'
+        verbose_name_plural = 'bookings'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'Booking {self.id} for {self.ad.title}'
