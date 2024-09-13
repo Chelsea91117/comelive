@@ -10,8 +10,6 @@ from myapp.serializers import UserCreateUpdateSerializer, UserListSerializer, Us
     AdSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from datetime import datetime
-
-from .filters import AdFilter
 from .permissions import IsLandlordOrReadOnly, IsOwnerOrReadOnly
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -114,7 +112,13 @@ class AdListCreateGenericAPIView(ListCreateAPIView):
     permission_classes = [IsLandlordOrReadOnly]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['title', 'description']
-    filterset_class = AdFilter
+    filterset_fields = {
+        'price': ['gte', 'lte'],
+        'state': ['icontains'],
+        'city': ['icontains'],
+        'rooms': ['gte', 'lte'],
+        'type': ['exact'],
+    }
     ordering_fields = ['price', 'created_at']
 
     def get_queryset(self):
