@@ -12,3 +12,8 @@ class IsOwnerOrReadOnly(BasePermission):
         if request.method in ['GET', 'HEAD', 'OPTIONS']:
             return True
         return obj.owner == request.user
+
+
+class IsRenter(BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_renter

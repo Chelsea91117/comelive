@@ -1,5 +1,5 @@
 from datetime import timedelta
-
+from decimal import Decimal
 from django.contrib.auth.models import UserManager, PermissionsMixin, AbstractBaseUser
 from django.db import models
 from django.utils import timezone
@@ -86,10 +86,14 @@ class Ad(models.Model):
 
 
 class Booking(models.Model):
-    STATUS_CHOICES = [ ('Pending', 'Pending'), ('Confirmed', 'Confirmed'), ('Rejected', 'Rejected'), ]
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Confirmed', 'Confirmed'),
+        ('Rejected', 'Rejected')
+    ]
     ad = models.ForeignKey('Ad', on_delete=models.CASCADE, related_name='bookings')
-    start_date = models.DateField(verbose_name='Start date', unique=True)
-    end_date = models.DateField(verbose_name='End date', unique=True)
+    start_date = models.DateField(verbose_name='Start date')
+    end_date = models.DateField(verbose_name='End date')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
     created_at = models.DateField(auto_now_add=True, verbose_name='Created at')
     updated_at = models.DateField(auto_now=True, verbose_name="Updated at")
@@ -97,13 +101,12 @@ class Booking(models.Model):
     landlord = models.ForeignKey(User, on_delete=models.CASCADE, related_name='landlord_bookings')
 
     @property
-    def busy_dates(self):
-        bookings = Booking.objects.filter(ad=self.ad).exclude(id=self.id)
-        busy_dates = []
-        for booking in bookings:
-            for date in range(booking.start_date, booking.end_date + timedelta(days=1)):
-                busy_dates.append(date)
-        return busy_dates
+    def total_days(self):
+        return (self.end_date - self.start_date).days + 1
+
+    @property
+    def total_cost(self):
+        return Decimal(self.total_days) * self.ad.price
 
     class Meta:
         verbose_name = 'booking'
@@ -112,3 +115,5 @@ class Booking(models.Model):
 
     def __str__(self):
         return f'Booking {self.id} for {self.ad.title}'
+
+

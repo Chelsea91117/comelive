@@ -1,16 +1,19 @@
+from django.db.models import Q
+from django.template.context_processors import request
 from rest_framework import status, filters
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateDestroyAPIView, ListCreateAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateDestroyAPIView, ListCreateAPIView, RetrieveUpdateAPIView
 from rest_framework.views import APIView
 from django.contrib.auth import authenticate
-from myapp.models import User, Ad
-from myapp.serializers import UserCreateUpdateSerializer, UserListSerializer, UserRetrieveUpdateDestroySerializer, \
-    AdSerializer
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from myapp.models import *
+from myapp.serializers import *
 from rest_framework_simplejwt.tokens import RefreshToken
 from datetime import datetime
-from .permissions import IsLandlordOrReadOnly, IsOwnerOrReadOnly
+from .permissions import IsLandlordOrReadOnly, IsOwnerOrReadOnly, IsRenter
 from django_filters.rest_framework import DjangoFilterBackend
 
 
@@ -108,7 +111,6 @@ class UserDetailGenericView(RetrieveUpdateDestroyAPIView):
 
 class AdListCreateGenericAPIView(ListCreateAPIView):
     serializer_class = AdSerializer
-    queryset = Ad.objects.all()
     permission_classes = [IsLandlordOrReadOnly]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['title', 'description']
@@ -126,7 +128,6 @@ class AdListCreateGenericAPIView(ListCreateAPIView):
 
 class UserAdListGenericAPIView(ListAPIView):
     serializer_class = AdSerializer
-    queryset = Ad.objects.all()
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
@@ -137,11 +138,51 @@ class AdRetrieveUpdateDestroyGenericAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Ad.objects.all()
     permission_classes = [IsOwnerOrReadOnly]
 
+class BookingCreateGenericAPIView(CreateAPIView):
+    serializer_class = BookingCreateSerializer
+    queryset = Booking.objects.all()
+    permission_classes = [IsRenter]
+
+class BookingListGenericView(ListAPIView):
+    serializer_class = BookingListSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Booking.objects.filter(Q(renter=self.request.user) | Q(landlord=self.request.user))
 
 
+class PastBookingsListGenericView(ListAPIView):
+    serializer_class = BookingListSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Booking.objects.filter(
+            Q(renter=self.request.user) | Q(landlord=self.request.user), end_date__lte=timezone.now())
+
+class ActiveBookingsListGenericView(ListAPIView):
+    serializer_class = BookingListSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Booking.objects.filter(
+            Q(renter=self.request.user) | Q(landlord=self.request.user), start_date__gte=timezone.now())
+
+class BookingRetrieveUpdateGenericAPIView(RetrieveUpdateAPIView):
+    serializer_class = BookingUpdateSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Booking.objects.filter(Q(renter=self.request.user) | Q(landlord=self.request.user))
 
 
+class BookedDatesListGenericAPIView(ListAPIView):
+    serializer_class = BookedDatesSerializer
+    permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        ad_id = self.kwargs.get('ad_id')
+        ad = get_object_or_404(Ad, pk=ad_id)
 
+        return Booking.objects.filter(ad=ad, status__in=["Confirmed", "Pending"], end_date__lte=timezone.now())
 
 
