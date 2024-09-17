@@ -28,7 +28,7 @@ urlpatterns = [
     # сoздание бронирования для арендатора
     path('bookings/<int:pk>/', BookingRetrieveUpdateGenericAPIView.as_view(), name='booking-update'),
     # изменение статуса объявления для владельцев и арендаторов
-    path('ads/<int:ad_id>/booked/', BookedDatesListGenericAPIView.as_view(), name='property-booked-dates'),
+    path('bookings/ads/<int:ad_id>/', BookedDatesListGenericAPIView.as_view(), name='property-booked-dates'),
     # лист забронированных дат для всех пользователей
 ]
 

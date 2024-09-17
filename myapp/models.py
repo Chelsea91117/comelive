@@ -117,3 +117,21 @@ class Booking(models.Model):
         return f'Booking {self.id} for {self.ad.title}'
 
 
+class Review(models.Model):
+    ad = models.ForeignKey('Ad', on_delete=models.CASCADE, related_name='reviews')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviews')
+    rating = models.SmallIntegerField()
+    comment = models.TextField(null=True, blank=True)
+    created_at = models.DateField(auto_now_add=True, verbose_name='Created at')
+
+    class Meta:
+        verbose_name = 'review'
+        verbose_name_plural = 'reviews'
+        ordering = ['-created_at']
+        unique_together = ['user', 'ad']
+
+    def __str__(self):
+        return f'Review for {self.ad} by {self.user}'
+
+
+
