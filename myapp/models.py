@@ -2,6 +2,7 @@ from datetime import timedelta
 from decimal import Decimal
 from django.contrib.auth.models import UserManager, PermissionsMixin, AbstractBaseUser
 from django.db import models
+from django.db.models import Avg
 from django.utils import timezone
 
 class CustomUserManager(UserManager):
@@ -75,6 +76,13 @@ class Ad(models.Model):
     created_at = models.DateField(auto_now_add=True)
     updated_at = models.DateField(auto_now=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    @property
+    def average_rating(self):
+        # Фильтруем отзывы, связанные с этим объявлением, и рассчитываем среднее значение поля 'rating'
+        avg_rating = self.reviews.aggregate(Avg('rating'))['rating__avg']
+        # Если нет отзывов, возвращаем 0, иначе округляем до 2 знаков после запятой
+        return round(avg_rating, 2) if avg_rating is not None else 0
 
     class Meta:
         verbose_name = 'ad'

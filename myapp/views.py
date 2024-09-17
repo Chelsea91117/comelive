@@ -109,7 +109,7 @@ class UserDetailGenericView(RetrieveUpdateDestroyAPIView):
     def perform_destroy(self, instance):
         instance.delete()
 
-class AdListCreateGenericAPIView(ListCreateAPIView):
+class AdListCreateGenericView(ListCreateAPIView):
     serializer_class = AdSerializer
     permission_classes = [IsLandlordOrReadOnly]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -126,19 +126,19 @@ class AdListCreateGenericAPIView(ListCreateAPIView):
     def get_queryset(self):
         return Ad.objects.filter(is_active=True)
 
-class UserAdListGenericAPIView(ListAPIView):
+class UserAdListGenericView(ListAPIView):
     serializer_class = AdSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return Ad.objects.filter(owner=self.request.user)
 
-class AdRetrieveUpdateDestroyGenericAPIView(RetrieveUpdateDestroyAPIView):
+class AdRetrieveUpdateDestroyGenericView(RetrieveUpdateDestroyAPIView):
     serializer_class = AdSerializer
     queryset = Ad.objects.all()
     permission_classes = [IsOwnerOrReadOnly]
 
-class BookingCreateGenericAPIView(CreateAPIView):
+class BookingCreateGenericView(CreateAPIView):
     serializer_class = BookingCreateSerializer
     queryset = Booking.objects.all()
     permission_classes = [IsRenter]
@@ -167,7 +167,7 @@ class ActiveBookingsListGenericView(ListAPIView):
         return Booking.objects.filter(
             Q(renter=self.request.user) | Q(landlord=self.request.user), start_date__gte=timezone.now())
 
-class BookingRetrieveUpdateGenericAPIView(RetrieveUpdateAPIView):
+class BookingRetrieveUpdateGenericView(RetrieveUpdateAPIView):
     serializer_class = BookingUpdateSerializer
     permission_classes = [IsAuthenticated]
 
@@ -175,7 +175,7 @@ class BookingRetrieveUpdateGenericAPIView(RetrieveUpdateAPIView):
         return Booking.objects.filter(Q(renter=self.request.user) | Q(landlord=self.request.user))
 
 
-class BookedDatesListGenericAPIView(ListAPIView):
+class BookedDatesListGenericView(ListAPIView):
     serializer_class = BookedDatesSerializer
     permission_classes = [IsAuthenticated]
 
@@ -186,3 +186,16 @@ class BookedDatesListGenericAPIView(ListAPIView):
         return Booking.objects.filter(ad=ad, status__in=["Confirmed", "Pending"], end_date__lte=timezone.now())
 
 
+class ReviewCreateGenericView(CreateAPIView):
+    serializer_class = ReviewCreateSerializer
+    queryset = Review.objects.all()
+    permission_classes = [IsRenter]
+
+
+class ReviewListGenericView(ListAPIView):
+    serializer_class = ReviewListSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        ad_id = self.kwargs['ad_id']
+        return Review.objects.filter(ad__id=ad_id)

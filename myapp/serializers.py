@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.relations import StringRelatedField
 import datetime
-from myapp.models import User, Ad, Booking
+from myapp.models import User, Ad, Booking, Review
 from django.core.exceptions import ValidationError
 from django.contrib.auth.password_validation import validate_password
 import re
@@ -66,6 +66,8 @@ class UserRetrieveUpdateDestroySerializer(serializers.ModelSerializer):
 
 class AdSerializer(serializers.ModelSerializer):
     owner = StringRelatedField(read_only=True)
+    average_rating = serializers.ReadOnlyField()
+
     class Meta:
         model = Ad
         fields = '__all__'
@@ -213,3 +215,45 @@ class BookedDatesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
         fields = ['start_date', 'end_date']
+
+class ReviewCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = ['ad', 'rating', 'comment']
+
+    def validate(self, data):
+        user = self.context['request'].user
+        ad = data.get('ad')
+
+        booking = Booking.objects.filter(
+            ad=ad,
+            renter=user,
+            status="Confirmed",
+            end_date__lte=datetime.date.today()).exists()
+
+        if not booking:
+            raise serializers.ValidationError({'ad': 'You can leave a review only after staying at this property.'})
+
+        if Review.objects.filter(user=user, ad=ad).exists():
+            raise serializers.ValidationError({"review": "You have already submitted a review for this listing."})
+
+        return data
+
+    def validate_rating(self, value):
+        if value < 1 or value > 5:
+            raise serializers.ValidationError({'rating': 'Rating must be between 0 and 5'})
+
+        return value
+
+    def create(self, validated_data):
+        validated_data['user'] = self.context['request'].user
+        return super().create(validated_data)
+
+
+class ReviewListSerializer(serializers.ModelSerializer):
+    user = StringRelatedField()
+    ad = StringRelatedField()
+
+    class Meta:
+        model = Review
+        fields = ['user', 'ad', 'rating', 'comment', 'created_at']
