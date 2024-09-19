@@ -13,7 +13,7 @@ urlpatterns = [
     # изменение, удаление пользователя для текущего пользователя
     path('ads/', AdListCreateGenericView.as_view(), name='ads-list-create'),
     # создание объявлений для владельцев и список для всех
-    path('ads/<int:pk>', AdRetrieveUpdateDestroyGenericView.as_view(), name='ads-retrieve-update-destroy'),
+    path('ads/<int:pk>/', AdRetrieveUpdateDestroyGenericView.as_view(), name='ads-retrieve-update-destroy'),
     # изменение, удаление объявлений для их владельцев
     path('ads/my/', UserAdListGenericView.as_view(), name='user-ads-list'),
     # лист объявлений пользователя для текущего пользователя
@@ -33,6 +33,8 @@ urlpatterns = [
     # Просмотр отзывов для объявления для аутентифицированных пользователей
     path('reviews/', ReviewCreateGenericView.as_view(), name='review-create'),
     # создание отзыва только для арендатора
+    path('', welcome_view, name='welcome'),
+
 ]
 
 

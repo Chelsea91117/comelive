@@ -15,7 +15,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from datetime import datetime
 from .permissions import IsLandlordOrReadOnly, IsOwnerOrReadOnly, IsRenter
 from django_filters.rest_framework import DjangoFilterBackend
-
+from django.http import HttpResponse
+from django.utils.html import format_html
 
 class LoginView(APIView):
     permission_classes = [AllowAny]
@@ -183,7 +184,7 @@ class BookedDatesListGenericView(ListAPIView):
         ad_id = self.kwargs.get('ad_id')
         ad = get_object_or_404(Ad, pk=ad_id)
 
-        return Booking.objects.filter(ad=ad, status__in=["Confirmed", "Pending"], end_date__lte=timezone.now())
+        return Booking.objects.filter(ad=ad, status__in=["Confirmed", "Pending"], end_date__gte=timezone.now())
 
 
 class ReviewCreateGenericView(CreateAPIView):
@@ -199,3 +200,38 @@ class ReviewListGenericView(ListAPIView):
     def get_queryset(self):
         ad_id = self.kwargs['ad_id']
         return Review.objects.filter(ad__id=ad_id)
+
+def welcome_view(request):
+    html_content = format_html('''
+        <html>
+        <head>
+            <title>Welcome to Come&Live API!</title>
+        </head>
+        <body>
+            <h1>Welcome to Come&Live API!</h1>
+            <h2>Available Paths:</h2>
+            <ul>
+                <li><a href="/admin/">admin/</a></li>
+                <li><a href="/register/">register/</a> [name='registration']</li>
+                <li><a href="/login/">login/</a> [name='login']</li>
+                <li><a href="/logout/">logout/</a> [name='logout']</li>
+                <li><a href="/users/">users/</a> [name='user-list']</li>
+                <li><a href="/users/1/">users/&lt;int:pk&gt;/</a> [name='user-retrieve-update-destroy']</li>
+                <li><a href="/users/details/">users/details/</a> [name='user-details']</li>
+                <li><a href="/ads/">ads/</a> [name='ads-list-create']</li>
+                <li><a href="/ads/1/">ads/&lt;int:pk&gt;/</a> [name='ads-retrieve-update-destroy']</li>
+                <li><a href="/ads/my/">ads/my/</a> [name='user-ads-list']</li>
+                <li><a href="/bookings/">bookings/</a> [name='booking-list']</li>
+                <li><a href="/bookings/past/">bookings/past/</a> [name='past-bookings-list']</li>
+                <li><a href="/bookings/active/">bookings/active/</a> [name='active-bookings-list']</li>
+                <li><a href="/bookings/new/">bookings/new/</a> [name='booking-create']</li>
+                <li><a href="/bookings/1/">bookings/&lt;int:pk&gt;/</a> [name='booking-update']</li>
+                <li><a href="/bookings/ads/1/">bookings/ads/&lt;int:ad_id&gt;/</a> [name='property-booked-dates']</li>
+                <li><a href="/reviews/1/">reviews/&lt;int:ad_id&gt;/</a> [name='ad-reviews-list']</li>
+                <li><a href="/reviews/">reviews/</a> [name='review-create']</li>
+            </ul>
+        </body>
+        </html>
+    ''')
+
+    return HttpResponse(html_content)

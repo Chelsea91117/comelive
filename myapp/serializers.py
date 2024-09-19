@@ -117,7 +117,7 @@ class BookingCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Booking
-        fields = ['id', 'ad', 'start_date', 'end_date']
+        fields = ['id', 'ad', 'start_date', 'end_date', 'total_cost', 'total_days']
 
 
     def validate_ad(self, ad):
@@ -186,7 +186,7 @@ class BookingUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
         exclude = ['created_at', 'updated_at']
-        read_only_fields = ['ad', 'renter', 'landlord', 'start_date', 'end_date']
+        read_only_fields = ['id', 'ad', 'renter', 'landlord', 'start_date', 'end_date']
 
     def validate(self, data):
         user = self.context['request'].user
@@ -212,9 +212,10 @@ class BookingUpdateSerializer(serializers.ModelSerializer):
 
 
 class BookedDatesSerializer(serializers.ModelSerializer):
+    ad = StringRelatedField()
     class Meta:
         model = Booking
-        fields = ['start_date', 'end_date']
+        fields = ['start_date', 'end_date', 'ad']
 
 class ReviewCreateSerializer(serializers.ModelSerializer):
     class Meta:
