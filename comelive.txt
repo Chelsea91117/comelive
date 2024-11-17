@@ -1,0 +1,26 @@
+pip install django     
+
+django-admin startproject come_live .
+
+python ../manage.py startapp properties
+
+pip install django-environ   
+
+python manage.py createsuperuser
+
+
+pip freeze > requirements.txt
+pip install -r requirements.txt
+
+pip install setuptools
+
+
+
+{
+  "email": "bob@mail.com",
+  "password": "passwordpassword"
+}
+
+
+
+

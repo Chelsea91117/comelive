@@ -1,0 +1,27 @@
+{
+  "email": "latifova_9@mail.ru",    #admin
+  "password": "password"
+}
+
+{
+  "email": "bob@mail.com",	 		#landlord
+  "password": "passwordpassword"
+}
+
+{
+  "email": "marley@mail.com",	 	#renter
+  "password": "passwordpassword"
+}
+
+{
+  "email": "david@mail.com",	 	#landlord
+  "password": "passwordpassword"
+}
+
+{
+  "email": "masha@mail.com",	 	#renter
+  "password": "passwordpassword"
+}
+
+
+

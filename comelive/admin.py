@@ -5,6 +5,3 @@ admin.site.register(User)
 admin.site.register(Ad)
 admin.site.register(Booking)
 admin.site.register(Review)
-
-
-
